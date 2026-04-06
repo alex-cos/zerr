@@ -28,3 +28,23 @@ func GetMessage(err error) string {
 	}
 	return err.Error()
 }
+
+func Chain(err error) []error {
+	if err == nil {
+		return nil
+	}
+	chain := []error{err}
+	for {
+		u, ok := err.(interface{ Unwrap() error })
+		if !ok {
+			break
+		}
+		next := u.Unwrap()
+		if next == nil {
+			break
+		}
+		chain = append(chain, next)
+		err = next
+	}
+	return chain
+}

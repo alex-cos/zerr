@@ -180,3 +180,4 @@ if errors.As(err, &zerr) {
 | `IsSeverity(err, sev)` | `bool` | Check if error (or any in chain) has severity |
 | `GetCode(err)` | `(int64, bool)` | Get error code, false if not a zerr |
 | `GetMessage(err)` | `string` | Get message or fallback to `err.Error()` |
+| `Chain(err)` | `[]error` | Get the full error chain from outer to inner |

@@ -2,6 +2,7 @@ package zerr_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/alex-cos/zerr"
@@ -290,6 +291,58 @@ func TestHelpers(t *testing.T) {
 			t.Parallel()
 			msg := zerr.GetMessage(nil)
 			assert.Empty(t, msg)
+		})
+	})
+
+	t.Run("Chain", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("returns nil for nil error", func(t *testing.T) {
+			t.Parallel()
+			assert.Nil(t, zerr.Chain(nil))
+		})
+
+		t.Run("returns single error when no wrapping", func(t *testing.T) {
+			t.Parallel()
+			err := zerr.New("single error")
+			chain := zerr.Chain(err)
+			assert.Len(t, chain, 1)
+			assert.Equal(t, "Error - single error", chain[0].Error())
+		})
+
+		t.Run("returns full chain for wrapped zerr", func(t *testing.T) {
+			t.Parallel()
+			inner := zerr.NewC(500, "inner")
+			outer := zerr.Wrap(inner, "outer")
+			chain := zerr.Chain(outer)
+			assert.Len(t, chain, 2)
+			assert.Equal(t, "Error - outer: Error[500] - inner", outer.Error())
+		})
+
+		t.Run("handles multiple wrapping levels", func(t *testing.T) {
+			t.Parallel()
+			inner := zerr.NewC(500, "root cause")
+			mid := zerr.WrapS(zerr.Warning, inner, "middle layer")
+			outer := zerr.Wrap(mid, "top layer")
+			chain := zerr.Chain(outer)
+			assert.Len(t, chain, 3)
+		})
+
+		t.Run("works with standard errors", func(t *testing.T) {
+			t.Parallel()
+			stdErr := errors.New("standard error")
+			wrapped := zerr.Wrap(stdErr, "wrapped")
+			chain := zerr.Chain(wrapped)
+			assert.Len(t, chain, 2)
+			assert.Equal(t, "standard error", chain[1].Error())
+		})
+
+		t.Run("handles fmt.Errorf wrapping", func(t *testing.T) {
+			t.Parallel()
+			inner := zerr.NewC(404, "not found")
+			outer := fmt.Errorf("context: %w", inner)
+			chain := zerr.Chain(outer)
+			assert.Len(t, chain, 2)
 		})
 	})
 }
