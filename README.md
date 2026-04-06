@@ -89,6 +89,16 @@ err := zerr.WrapSC(zerr.Fatal, 9001, origErr, "system unrecoverable")
 
 ## Inspecting Errors
 
+### Using helper functions (recommended)
+
+```go
+zerr.IsSeverity(err, zerr.Warning) // true/false
+code, ok := zerr.GetCode(err)      // 404, true
+msg := zerr.GetMessage(err)        // "lookup failed"
+```
+
+### Using type assertion
+
 ```go
 err := zerr.WrapC(404, zerr.New("user not found"), "lookup failed")
 
@@ -162,6 +172,14 @@ if errors.As(err, &zerr) {
 | `Code()` | `int64` | Error code |
 | `Message()` | `string` | Error message |
 | `Unwrap()` | `error` | Wrapped underlying error |
+
+### Helper Functions
+
+| Function | Returns | Description |
+| -------- | --------- | ------------- |
+| `IsSeverity(err, sev)` | `bool` | Check if error (or any in chain) has severity |
+| `GetCode(err)` | `(int64, bool)` | Get error code, false if not a zerr |
+| `GetMessage(err)` | `string` | Get message or fallback to `err.Error()` |
 
 ## License
 

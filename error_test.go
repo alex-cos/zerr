@@ -149,3 +149,117 @@ func TestWrap(t *testing.T) {
 		assert.ErrorIs(t, err, underlying)
 	})
 }
+
+func TestHelpers(t *testing.T) {
+	t.Parallel()
+
+	t.Run("IsSeverity", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("matches severity", func(t *testing.T) {
+			t.Parallel()
+			err := zerr.NewS(zerr.Warning, "test")
+			assert.True(t, zerr.IsSeverity(err, zerr.Warning))
+		})
+
+		t.Run("does not match different severity", func(t *testing.T) {
+			t.Parallel()
+			err := zerr.NewS(zerr.Warning, "test")
+			assert.False(t, zerr.IsSeverity(err, zerr.Error))
+		})
+
+		t.Run("finds severity in wrapped chain", func(t *testing.T) {
+			t.Parallel()
+			inner := zerr.NewS(zerr.Critical, "inner")
+			err := zerr.Wrap(inner, "outer")
+			assert.False(t, zerr.IsSeverity(err, zerr.Critical))
+			assert.True(t, zerr.IsSeverity(err, zerr.Error))
+			assert.True(t, zerr.IsSeverity(inner, zerr.Critical))
+		})
+
+		t.Run("returns false for non-zerr error", func(t *testing.T) {
+			t.Parallel()
+			err := errors.New("standard error")
+			assert.False(t, zerr.IsSeverity(err, zerr.Error))
+		})
+
+		t.Run("returns false for nil error", func(t *testing.T) {
+			t.Parallel()
+			assert.False(t, zerr.IsSeverity(nil, zerr.Error))
+		})
+	})
+
+	t.Run("GetCode", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("returns code when present", func(t *testing.T) {
+			t.Parallel()
+			err := zerr.NewC(404, "not found")
+			code, ok := zerr.GetCode(err)
+			assert.True(t, ok)
+			assert.Equal(t, int64(404), code)
+		})
+
+		t.Run("returns zero code with ok=true", func(t *testing.T) {
+			t.Parallel()
+			err := zerr.New("no code")
+			code, ok := zerr.GetCode(err)
+			assert.True(t, ok)
+			assert.Equal(t, int64(0), code)
+		})
+
+		t.Run("finds code in wrapped chain", func(t *testing.T) {
+			t.Parallel()
+			inner := zerr.NewC(500, "inner")
+			err := zerr.Wrap(inner, "outer")
+			code, ok := zerr.GetCode(err)
+			assert.True(t, ok)
+			assert.Equal(t, int64(0), code)
+		})
+
+		t.Run("returns false for non-zerr error", func(t *testing.T) {
+			t.Parallel()
+			err := errors.New("standard error")
+			_, ok := zerr.GetCode(err)
+			assert.False(t, ok)
+		})
+
+		t.Run("returns false for nil error", func(t *testing.T) {
+			t.Parallel()
+			_, ok := zerr.GetCode(nil)
+			assert.False(t, ok)
+		})
+	})
+
+	t.Run("GetMessage", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("returns message when present", func(t *testing.T) {
+			t.Parallel()
+			err := zerr.New("hello world")
+			msg := zerr.GetMessage(err)
+			assert.Equal(t, "hello world", msg)
+		})
+
+		t.Run("returns outer message in wrapped chain", func(t *testing.T) {
+			t.Parallel()
+			inner := zerr.New("inner message")
+			err := zerr.Wrap(inner, "outer message")
+			msg := zerr.GetMessage(err)
+			assert.Equal(t, "outer message", msg)
+		})
+
+		t.Run("returns standard error message for non-zerr error", func(t *testing.T) {
+			t.Parallel()
+			err := errors.New("standard error")
+			msg := zerr.GetMessage(err)
+			assert.Equal(t, "standard error", msg)
+		})
+
+		t.Run("returns empty string for nil error", func(t *testing.T) {
+			t.Parallel()
+			msg := zerr.GetMessage(nil)
+			assert.Empty(t, msg)
+		})
+	})
+}
