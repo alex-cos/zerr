@@ -26,7 +26,7 @@ func (value Severity) String() string {
 		"Fatal",
 	}
 	if value < Debug || value > Fatal {
-		return names[0]
+		return "Unknown"
 	}
 	return names[value]
 }
