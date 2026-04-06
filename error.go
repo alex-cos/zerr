@@ -10,6 +10,7 @@ type ZError struct {
 	severity Severity
 	code     int64
 	message  string
+	err      error
 }
 
 // Error the extended Error function.
@@ -20,10 +21,12 @@ func (z *ZError) Error() string {
 	if z.code > 0 {
 		buf.WriteString(fmt.Sprintf("[%d]", z.code))
 	}
-	if buf.Len() > 0 {
-		buf.WriteString(" - ")
-	}
+	buf.WriteString(" - ")
 	buf.WriteString(z.message)
+	if z.err != nil {
+		buf.WriteString(": ")
+		buf.WriteString(z.err.Error())
+	}
 	return buf.String()
 }
 
@@ -37,6 +40,10 @@ func (z *ZError) Code() int64 {
 
 func (z *ZError) Message() string {
 	return z.message
+}
+
+func (z *ZError) Unwrap() error {
+	return z.err
 }
 
 func New(message string) error {
@@ -104,5 +111,41 @@ func ErrorSCf(severity Severity, code int64, format string, v ...interface{}) er
 		severity: severity,
 		code:     code,
 		message:  message,
+	}
+}
+
+func Wrap(err error, message string) error {
+	return &ZError{
+		severity: Error,
+		code:     0,
+		message:  message,
+		err:      err,
+	}
+}
+
+func WrapS(severity Severity, err error, message string) error {
+	return &ZError{
+		severity: severity,
+		code:     0,
+		message:  message,
+		err:      err,
+	}
+}
+
+func WrapC(code int64, err error, message string) error {
+	return &ZError{
+		severity: Error,
+		code:     code,
+		message:  message,
+		err:      err,
+	}
+}
+
+func WrapSC(severity Severity, code int64, err error, message string) error {
+	return &ZError{
+		severity: severity,
+		code:     code,
+		message:  message,
+		err:      err,
 	}
 }
