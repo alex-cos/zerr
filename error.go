@@ -19,7 +19,7 @@ func (z *ZError) Error() string {
 
 	buf.WriteString(z.severity.String())
 	if z.code > 0 {
-		buf.WriteString(fmt.Sprintf("[%d]", z.code))
+		fmt.Fprintf(&buf, "[%d]", z.code)
 	}
 	buf.WriteString(" - ")
 	buf.WriteString(z.message)
@@ -78,7 +78,7 @@ func NewSC(severity Severity, code int64, message string) error {
 	}
 }
 
-func Errorf(format string, v ...interface{}) error {
+func Errorf(format string, v ...any) error {
 	message := fmt.Sprintf(format, v...)
 	return &ZError{
 		severity: Error,
@@ -87,7 +87,7 @@ func Errorf(format string, v ...interface{}) error {
 	}
 }
 
-func ErrorSf(severity Severity, format string, v ...interface{}) error {
+func ErrorSf(severity Severity, format string, v ...any) error {
 	message := fmt.Sprintf(format, v...)
 	return &ZError{
 		severity: severity,
@@ -96,7 +96,7 @@ func ErrorSf(severity Severity, format string, v ...interface{}) error {
 	}
 }
 
-func ErrorCf(code int64, format string, v ...interface{}) error {
+func ErrorCf(code int64, format string, v ...any) error {
 	message := fmt.Sprintf(format, v...)
 	return &ZError{
 		severity: Error,
@@ -105,7 +105,7 @@ func ErrorCf(code int64, format string, v ...interface{}) error {
 	}
 }
 
-func ErrorSCf(severity Severity, code int64, format string, v ...interface{}) error {
+func ErrorSCf(severity Severity, code int64, format string, v ...any) error {
 	message := fmt.Sprintf(format, v...)
 	return &ZError{
 		severity: severity,
