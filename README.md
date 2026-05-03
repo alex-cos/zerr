@@ -1,5 +1,11 @@
 # zerr
 
+[![Go Version](https://img.shields.io/badge/Go-1.22%2B-blue)](https://go.dev/)
+[![Test Status](https://github.com/alex-cos/zerr/actions/workflows/test.yml/badge.svg)](https://github.com/alex-cos/zerr/actions/workflows/test.yml)
+[![Lint Status](https://github.com/alex-cos/zerr/actions/workflows/lint.yml/badge.svg)](https://github.com/alex-cos/zerr/actions/workflows/lint.yml)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alex-cos/zerr)](https://goreportcard.com/report/github.com/alex-cos/zerr)
+
 `zerr` is a lightweight Go package that provides an enhanced error structure with **severity levels**, **error codes**, and **error wrapping** support — fully compatible with the Go 1.13+ `errors` package.
 
 ## Features
